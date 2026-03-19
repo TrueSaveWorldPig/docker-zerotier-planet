@@ -40,7 +40,9 @@
 - [3. 开始安装](#3-开始安装)
   - [3.1 环境准备](#31-环境准备)
   - [3.2 下载项目源码](#32-下载项目源码)
-  - [3.3 执行安装脚本](#33-执行安装脚本)
+  - [3.3 部署服务](#33-部署服务)
+    - [3.3.1 使用 Docker Compose 部署 (推荐)](#331-使用-docker-compose-部署-推荐)
+    - [3.3.2 使用 Docker Run 部署](#332-使用-docker-run-部署)
   - [3.4 下载 planet 文件](#34-下载-planet-文件)
   - [3.5 新建网络](#35-新建网络)
 - [4. 客户端配置](#4-客户端配置)
@@ -211,34 +213,44 @@ git clone https://github.com/xubiaolin/docker-zerotier-planet.git
 git clone https://ghproxy.imoyuapp.win/github.com/xubiaolin/docker-zerotier-planet.git
 ```
 
-### 3.3 执行安装脚本
+### 3.3 部署服务
 
-1. **进入项目目录：**
+#### 3.3.1 使用 Docker Compose 部署 (推荐)
+
+1. 进入项目目录：
+   ```bash
+   cd docker-zerotier-planet
+   ```
+
+2. 启动服务：
+   ```bash
+   docker compose up -d
+   ```
+
+#### 3.3.2 使用 Docker Run 部署
+
+如果您不想使用 Docker Compose，也可以使用以下命令：
+
 ```bash
-cd docker-zerotier-planet
+docker run -d \
+  --name zerotier-planet \
+  --restart always \
+  -p 9994:9994 \
+  -p 9994:9994/udp \
+  -p 3443:3443 \
+  -p 3000:3000 \
+  -v $(pwd)/data/zerotier-one:/var/lib/zerotier-one \
+  -v $(pwd)/data/ztncui:/app/ztncui \
+  -v $(pwd)/data/dist:/app/dist \
+  -v $(pwd)/data/config:/app/config \
+  -e TZ=Asia/Shanghai \
+  -e ZT_PORT=9994 \
+  -e API_PORT=3443 \
+  -e FILE_SERVER_PORT=3000 \
+  xubiaolin/zerotier-planet:latest
 ```
 
-2. **运行部署脚本：**
-```bash
-./deploy.sh
-```
-
-3. **根据提示选择操作：**
-```
-欢迎使用 zerotier-planet 脚本，请选择需要执行的操作：
-1. 安装
-2. 卸载
-3. 更新
-4. 查看信息
-5. 退出
-请输入数字：
-```
-
-> **提示**：整个脚本预计需要 1-3 分钟，具体时间取决于网络与机型
-
-4. **安装成功标志：**
-
-![install-finish](./assets/install_finish.png)
+---
 
 ### 3.4 下载 planet 文件
 

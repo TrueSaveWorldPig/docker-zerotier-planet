@@ -1,0 +1,24 @@
+version: '3'
+services:
+  zerotier-planet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zerotier-planet
+    container_name: zerotier-planet
+    ports:
+      - "${ZT_PORT:-9994}:9994"
+      - "${ZT_PORT:-9994}:9994/udp"
+      - "${API_PORT:-3443}:3443"
+      - "${FILE_SERVER_PORT:-3000}:3000"
+    environment:
+      - TZ=Asia/Shanghai
+      - ZT_PORT=${ZT_PORT:-9994}
+      - API_PORT=${API_PORT:-3443}
+      - FILE_SERVER_PORT=${FILE_SERVER_PORT:-3000}
+    volumes:
+      - ./data/zerotier-one:/var/lib/zerotier-one
+      - ./data/ztncui:/app/ztncui
+      - ./data/dist:/app/dist
+      - ./data/config:/app/config
+    restart: always

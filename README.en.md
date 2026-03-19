@@ -37,7 +37,9 @@
 - [3. Getting Started](#3-getting-started)
   - [3.1 Prerequisites](#31-prerequisites)
   - [3.2 Get the Source Code](#32-get-the-source-code)
-  - [3.3 Run the Installer](#33-run-the-installer)
+  - [3.3 Deployment](#33-deployment)
+    - [3.3.1 Deploy using Docker Compose (Recommended)](#331-deploy-using-docker-compose-recommended)
+    - [3.3.2 Deploy using Docker Run](#332-deploy-using-docker-run)
   - [3.4 Download the planet File](#34-download-the-planet-file)
   - [3.5 Create a Network](#35-create-a-network)
 - [4. Client Configuration](#4-client-configuration)
@@ -206,34 +208,44 @@ git clone https://github.com/xubiaolin/docker-zerotier-planet.git
 git clone https://github.com/xubiaolin/docker-zerotier-planet.git
 ```
 
-### 3.3 Run the Installer
+### 3.3 Deployment
 
-1. **Enter the project directory:**
+#### 3.3.1 Deploy using Docker Compose (Recommended)
+
+1. Enter the project directory:
+   ```bash
+   cd docker-zerotier-planet
+   ```
+
+2. Start the service:
+   ```bash
+   docker compose up -d
+   ```
+
+#### 3.3.2 Deploy using Docker Run
+
+If you don't want to use Docker Compose, you can use the following command:
+
 ```bash
-cd docker-zerotier-planet
+docker run -d \
+  --name zerotier-planet \
+  --restart always \
+  -p 9994:9994 \
+  -p 9994:9994/udp \
+  -p 3443:3443 \
+  -p 3000:3000 \
+  -v $(pwd)/data/zerotier-one:/var/lib/zerotier-one \
+  -v $(pwd)/data/ztncui:/app/ztncui \
+  -v $(pwd)/data/dist:/app/dist \
+  -v $(pwd)/data/config:/app/config \
+  -e TZ=Asia/Shanghai \
+  -e ZT_PORT=9994 \
+  -e API_PORT=3443 \
+  -e FILE_SERVER_PORT=3000 \
+  xubiaolin/zerotier-planet:latest
 ```
 
-2. **Run the deployment script:**
-```bash
-./deploy.sh
-```
-
-3. **Choose an action:**
-```
-Welcome to the zerotier-planet script. Choose an action:
-1. Install
-2. Uninstall
-3. Update
-4. Show Info
-5. Exit
-Enter a number:
-```
-
-> **Tip:** The script typically completes in 1–3 minutes, depending on your network and hardware.
-
-4. **Successful installation:**
-
-![install-finish](./assets/install_finish.png)
+---
 
 ### 3.4 Download the planet File
 

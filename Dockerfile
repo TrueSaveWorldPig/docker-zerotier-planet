@@ -1,13 +1,13 @@
-FROM alpine:3.14 as builder
+FROM alpine:3.19 as builder
 
 ENV TZ=Asia/Shanghai
 ARG TAG=actions
 ENV TAG=${TAG}
 
 WORKDIR /app
-ADD ./patch/entrypoint.sh /app/entrypoint.sh
-ADD ./patch/http_server.js /app/http_server.js
-ADD ./patch/mkworld_custom.cpp /app/patch/mkworld_custom.cpp
+COPY ./docker/entrypoint.sh /app/entrypoint.sh
+COPY ./docker/http_server.js /app/http_server.js
+COPY ./docker/mkworld_custom.cpp /app/patch/mkworld_custom.cpp
 
 # init tool
 RUN set -x\
@@ -27,9 +27,9 @@ RUN set -x\
     && make -j\
     && make install\
     && echo "make success!"\
-    && zerotier-one -d || true\
+    && (zerotier-one -d || true)\
     && sleep 5s\
-    && (ps -ef |grep zerotier-one |grep -v grep |awk '{print $1}' |xargs kill -9 || true)\
+    && (pkill -9 zerotier-one || true)\
     && echo "zerotier-one init success!"\
     && cd /app/ZeroTierOne/attic/world \
     && cp /app/patch/mkworld_custom.cpp .\
@@ -40,9 +40,7 @@ RUN set -x\
     && mv mkworld /var/lib/zerotier-one\
     && echo "mkworld build success!"
 
-
-
-#make ztncui 
+# make ztncui 
 RUN set -x \
     && mkdir /app -p \
     &&  cd /app \
@@ -52,25 +50,22 @@ RUN set -x \
     && npm install -g node-gyp\
     && npm install 
 
-FROM alpine:3.14
+FROM alpine:3.19
 
 WORKDIR /app
 
 ENV IP_ADDR4=''
 ENV IP_ADDR6=''
-
 ENV ZT_PORT=9994
 ENV API_PORT=3443
 ENV FILE_SERVER_PORT=3000
-
 ENV GH_MIRROR="https://mirror.ghproxy.com/"
 ENV FILE_KEY=''
 ENV TZ=Asia/Shanghai
 
 COPY --from=builder /app/ztncui /bak/ztncui
 COPY --from=builder /var/lib/zerotier-one /bak/zerotier-one
-
-COPY --from=builder /app/ZeroTierOne/zerotier-one /usr/sbin/zerotier-one
+COPY --from=builder /usr/sbin/zerotier-one /usr/sbin/zerotier-one
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
 COPY --from=builder /app/http_server.js /app/http_server.js
 
@@ -78,7 +73,6 @@ RUN set -x \
     && apk update \
     && apk add --no-cache npm curl jq openssl\
     && mkdir /app/config -p 
-
 
 VOLUME [ "/app/dist","/app/ztncui","/var/lib/zerotier-one","/app/config"]
 
