@@ -35,33 +35,7 @@ RUN set -x\
     && cp /app/patch/mkworld_custom.cpp .\
     && mv mkworld.cpp mkworld.cpp.bak \
     && mv mkworld_custom.cpp mkworld.cpp \
-    \
-    # 【关键修改】不再直接运行 build.sh，而是手动执行编译，并增加必要的库和检查
-    && echo "🔍 检查源文件是否存在..." \
-    && ls -la ../../node/C25519.cpp ../../node/Identity.cpp || (echo "❌ 源文件缺失！检查 TAG 版本是否正确" && exit 1) \
-    \
-    && echo "🔨 开始编译 mkworld (增加 -lpthread -lssl -lcrypto)..." \
-    && c++ -std=c++11 \
-       -I../.. \
-       -I../../ext \
-       -I.. \
-       -g \
-       -o mkworld \
-       ../../node/C25519.cpp \
-       ../../node/Salsa20.cpp \
-       ../../node/SHA512.cpp \
-       ../../node/Identity.cpp \
-       ../../node/Utils.cpp \
-       ../../node/InetAddress.cpp \
-       ../../osdep/OSUtils.cpp \
-       mkworld.cpp \
-       -lm -lpthread -lssl -lcrypto \
->&1 | tee /tmp/compile_error.log \
-    \
-    # 如果编译失败，打印详细错误并退出
-    || (echo "❌ 编译失败！详细错误如下：" && cat /tmp/compile_error.log && exit 1) \
-    \
-    && echo "✅ mkworld 编译成功!" \
+    && sh build.sh \
     && mkdir -p /var/lib/zerotier-one \
     && mv mkworld /var/lib/zerotier-one\
     && echo "mkworld build success!"
